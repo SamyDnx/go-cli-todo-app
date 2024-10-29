@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strconv"
+	"time"
 )
 
 type Tasks struct {
@@ -37,15 +39,35 @@ func main() {
 		return
 	}
 
-	if argc >= 1 && argv[0] == "list" {
+	if argc == 0 {
+		fmt.Println("Missing requiered argument. Run with help command to display all available commands.")
+		return
+	} else if argc >= 1 && argv[0] == "list" {
 		if argc == 1 {
 			printList(tasks)
 		} else if argv[1] == "todo" {
-			// display all todo tasks
+			displayStatusTasks(tasks, "todo")
 		} else if argv[1] == "in-progress" {
-			// display all in-progress tasks
+			displayStatusTasks(tasks, "in-progress")
 		} else if argv[1] == "done" {
-			// display all done tasks
+			displayStatusTasks(tasks, "done")
+		} else {
+			fmt.Println("Unvalid command:", argv)
+			return
+		}
+	} else if argc >= 1 && argv[0] == "add" {
+		if argc == 1 {
+			fmt.Println("Run <add \"The tasks you want to add\"> to create a new task")
+		} else if argc == 2 {
+			addTask(tasks, argv[1], filename)
+		} else {
+			fmt.Println("Unvalid command:", argv)
+		}
+	} else if argc >= 1 && argv[0] == "update" {
+		if argc == 1 {
+			fmt.Println("Run <update id \"updated task\"> to update a task")
+		} else if argc == 3 {
+			updateTask(tasks, argv[1], argv[2], filename)
 		} else {
 			fmt.Println("Unvalid command:", argv)
 		}
@@ -81,4 +103,90 @@ func printList(tasks Tasks) {
 		fmt.Println("Task status:", tasks.Tasks[i].Status)
 		fmt.Println()
 	}
+}
+
+func displayStatusTasks(tasks Tasks, status string) {
+	for _, task := range tasks.Tasks {
+		if task.Status == status {
+			fmt.Println("Task id:", task.Id)
+			fmt.Println("Task description:", task.Description)
+			fmt.Println("Task created at:", task.CreatedAt)
+			fmt.Println("Task updated at:", task.UpdatedAt)
+			fmt.Println("Task status:", task.Status)
+			fmt.Println()
+		}
+	}
+}
+
+func updateJSON(tasks Tasks, filename string) {
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	if err := encoder.Encode(tasks); err != nil {
+		fmt.Println("Error encoding tasks to JSON:", err)
+		return
+	}
+}
+
+func addTask(tasks Tasks, description string, filename string) {
+	for _, task := range tasks.Tasks {
+		if task.Description == description {
+			fmt.Println("Task", description, "all ready exist.")
+			return
+		}
+	}
+
+	newTask := Task{
+		Id:          len(tasks.Tasks) + 1,
+		Description: description,
+		CreatedAt:   time.Now().Format("2006/01/02, 15:04"),
+		UpdatedAt:   time.Now().Format("2006/01/02, 15:04"),
+		Status:      "todo",
+	}
+
+	tasks.Tasks = append(tasks.Tasks, newTask)
+
+	updateJSON(tasks, filename)
+
+	fmt.Println("Task added:", description)
+}
+
+func updateTask(tasks Tasks, idd string, description string, filename string) {
+
+	id, err := strconv.Atoi(idd)
+	if err != nil {
+		fmt.Println("Invalid id:", idd)
+		return
+	}
+
+	foundTask := false
+	for _, task := range tasks.Tasks {
+		if task.Description == description {
+			fmt.Println("Task", description, "allready exists")
+			return
+		}
+	}
+
+	for i, task := range tasks.Tasks {
+		if task.Id == id {
+			tasks.Tasks[i].Description = description
+			tasks.Tasks[i].UpdatedAt = time.Now().Format("2006/01/02, 15:04")
+			foundTask = true
+			break
+		}
+	}
+
+	if foundTask == false {
+		fmt.Println("Task not found.")
+		return
+	}
+
+	updateJSON(tasks, filename)
+
+	fmt.Println("Task updated")
 }
