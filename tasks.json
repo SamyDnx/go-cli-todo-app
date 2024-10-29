@@ -1,0 +1,18 @@
+{
+  "tasks": [
+    {
+      "id": 1,
+      "description": "Eat some sand",
+      "createdAt": "2024/10/29, 01:16",
+      "updatedAt": "2024/10/29, 01:16",
+      "status": "todo"
+    },
+    {
+      "id": 2,
+      "description": "Poop at all neigbohrs house",
+      "createdAt": "2024/10/29, 01:20",
+      "updatedAt": "2024/10/29, 01:20",
+      "status": "in progress"
+    }
+  ]
+}
