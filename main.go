@@ -42,6 +42,8 @@ func main() {
 	if argc == 0 {
 		fmt.Println("Missing requiered argument. Run with help command to display all available commands.")
 		return
+	} else if argc == 1 && argv[0] == "help" {
+		printHelp()
 	} else if argc >= 1 && argv[0] == "list" {
 		if argc == 1 {
 			printList(tasks)
@@ -57,19 +59,28 @@ func main() {
 		}
 	} else if argc >= 1 && argv[0] == "add" {
 		if argc == 1 {
-			fmt.Println("Run <add \"The tasks you want to add\"> to create a new task")
+			fmt.Println("Run <add [task you want to add]> to create a new task")
 		} else if argc == 2 {
 			addTask(tasks, argv[1], filename)
 		} else {
-			fmt.Println("Unvalid command:", argv)
+			fmt.Println("Invalid command:", argv)
 		}
 	} else if argc >= 1 && argv[0] == "update" {
 		if argc == 1 {
-			fmt.Println("Run <update id \"updated task\"> to update a task")
+			fmt.Println("Run <update [id] [updated task description]> to update a task")
 		} else if argc == 3 {
 			updateTask(tasks, argv[1], argv[2], filename)
 		} else {
 			fmt.Println("Unvalid command:", argv)
+		}
+	} else if argc >= 1 && argv[0] == "delete" {
+		if argc == 1 {
+			fmt.Println("Run <delete [id]> to delete a task.")
+		} else if argc == 2 {
+			deleteTask(tasks, argv[1], filename)
+		} else {
+			fmt.Println("Invalid command:", argv)
+			return
 		}
 	} else if argc >= 1 && argv[0] == "mark-done" {
 		markStatusTask(tasks, argv[1], argv[0], filename)
@@ -77,6 +88,9 @@ func main() {
 		markStatusTask(tasks, argv[1], argv[0], filename)
 	} else if argc >= 1 && argv[0] == "mark-todo" {
 		markStatusTask(tasks, argv[1], argv[0], filename)
+	} else {
+		fmt.Println("Invalid command:", argv)
+		return
 	}
 }
 
@@ -97,6 +111,17 @@ func readJSON(filename string) (Tasks, error) {
 	json.Unmarshal(data, &tasks)
 
 	return tasks, nil
+}
+
+func printHelp() {
+	fmt.Println("Here is all available commands:")
+	fmt.Println("\tlist: \tdisplay all tasks")
+	fmt.Println("\tadd: \tadd a task")
+	fmt.Println("\tmark: \tset a new status of a task")
+	fmt.Println("\tupdate: change the description of a task")
+	fmt.Println("\tdelete: delete a task")
+	fmt.Println("\nRun a command without anymore argument to learn how to use it.")
+	fmt.Println()
 }
 
 func printList(tasks Tasks) {
@@ -233,4 +258,35 @@ func markStatusTask(tasks Tasks, _id string, _status string, filename string) {
 
 	updateJSON(tasks, filename)
 	fmt.Println("Status modified.")
+}
+
+func deleteTask(tasks Tasks, _id string, filename string) {
+	id, err := strconv.Atoi((_id))
+	if err != nil {
+		fmt.Println("Invalid id:", _id)
+		return
+	}
+
+	foundTask := false
+	for i, task := range tasks.Tasks {
+		if task.Id == id {
+			tasks.Tasks = append(tasks.Tasks[:i], tasks.Tasks[i+1:]...)
+			foundTask = true
+			break
+		}
+	}
+
+	if foundTask == false {
+		fmt.Println("Task not found.")
+		return
+	} else {
+		for i, task := range tasks.Tasks {
+			if task.Id != i+1 {
+				tasks.Tasks[i].Id = i + 1
+			}
+		}
+	}
+
+	updateJSON(tasks, filename)
+	fmt.Println("Task deleted.")
 }
