@@ -71,6 +71,12 @@ func main() {
 		} else {
 			fmt.Println("Unvalid command:", argv)
 		}
+	} else if argc >= 1 && argv[0] == "mark-done" {
+		markStatusTask(tasks, argv[1], argv[0], filename)
+	} else if argc >= 1 && argv[0] == "mark-in-progress" {
+		markStatusTask(tasks, argv[1], argv[0], filename)
+	} else if argc >= 1 && argv[0] == "mark-todo" {
+		markStatusTask(tasks, argv[1], argv[0], filename)
 	}
 }
 
@@ -88,7 +94,6 @@ func readJSON(filename string) (Tasks, error) {
 	}
 
 	var tasks Tasks
-
 	json.Unmarshal(data, &tasks)
 
 	return tasks, nil
@@ -152,19 +157,16 @@ func addTask(tasks Tasks, description string, filename string) {
 	tasks.Tasks = append(tasks.Tasks, newTask)
 
 	updateJSON(tasks, filename)
-
 	fmt.Println("Task added:", description)
 }
 
-func updateTask(tasks Tasks, idd string, description string, filename string) {
-
-	id, err := strconv.Atoi(idd)
+func updateTask(tasks Tasks, _id string, description string, filename string) {
+	id, err := strconv.Atoi(_id)
 	if err != nil {
-		fmt.Println("Invalid id:", idd)
+		fmt.Println("Invalid id:", _id)
 		return
 	}
 
-	foundTask := false
 	for _, task := range tasks.Tasks {
 		if task.Description == description {
 			fmt.Println("Task", description, "allready exists")
@@ -172,6 +174,7 @@ func updateTask(tasks Tasks, idd string, description string, filename string) {
 		}
 	}
 
+	foundTask := false
 	for i, task := range tasks.Tasks {
 		if task.Id == id {
 			tasks.Tasks[i].Description = description
@@ -187,6 +190,47 @@ func updateTask(tasks Tasks, idd string, description string, filename string) {
 	}
 
 	updateJSON(tasks, filename)
-
 	fmt.Println("Task updated")
+}
+
+func markStatusTask(tasks Tasks, _id string, _status string, filename string) {
+	id, err := strconv.Atoi(_id)
+	if err != nil {
+		fmt.Println("Invalid id:", _id)
+		return
+	}
+
+	status := ""
+	if _status == "mark-done" {
+		status = "done"
+	} else if _status == "mark-in-progress" {
+		status = "in-progress"
+	} else if _status == "mark-todo" {
+		status = "todo"
+	} else {
+		fmt.Println("Invalid status:", _status)
+		return
+	}
+
+	foundTask := false
+	for i, task := range tasks.Tasks {
+		if task.Id == id {
+			if task.Status == status {
+				fmt.Println("Task allready have", status, "status.")
+				return
+			}
+			tasks.Tasks[i].Status = status
+			tasks.Tasks[i].UpdatedAt = time.Now().Format("2006/01/02, 15:04")
+			foundTask = true
+			break
+		}
+	}
+
+	if foundTask == false {
+		fmt.Println("Task not found.")
+		return
+	}
+
+	updateJSON(tasks, filename)
+	fmt.Println("Status modified.")
 }
