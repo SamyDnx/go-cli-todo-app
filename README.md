@@ -91,16 +91,6 @@ For a list of available commands, use:
 ./taskmanager mark-done 2
 ```
 
-## Contributing
-
-If you'd like to contribute to this project, please fork the repository and use a feature branch. Pull requests are warmly welcome.
-
-1. Fork the repo
-2. Create your feature branch (`git checkout -b feature/your-feature`)
-3. Commit your changes (`git commit -am 'Add new feature'`)
-4. Push to the branch (`git push origin feature/your-feature`)
-5. Create a new Pull Request
-
 ## License
 
 This project is open-source and available under the MIT License. See the `LICENSE` file for more information.
