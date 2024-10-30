@@ -1,7 +1,5 @@
 package main
 
-// TODO: Clean up code and fix typos
-
 import (
 	"encoding/json"
 	"errors"
@@ -168,7 +166,7 @@ func updateJSON(tasks Tasks, filename string) {
 func addTask(tasks Tasks, description string, filename string) {
 	for _, task := range tasks.Tasks {
 		if task.Description == description {
-			fmt.Println("Task", description, "all ready exist.")
+			fmt.Println("Task", description, "already exist.")
 			return
 		}
 	}
@@ -206,7 +204,7 @@ func updateTask(tasks Tasks, _id string, description string, filename string) {
 
 	for _, task := range tasks.Tasks {
 		if task.Description == description {
-			fmt.Println("Task", description, "allready exists")
+			fmt.Println("Task", description, "already exists")
 			return
 		}
 	}
@@ -253,7 +251,7 @@ func markStatusTask(tasks Tasks, _id string, _status string, filename string) {
 	for i, task := range tasks.Tasks {
 		if task.Id == id {
 			if task.Status == status {
-				fmt.Println("Task allready have", status, "status.")
+				fmt.Println("Task already have", status, "status.")
 				return
 			}
 			tasks.Tasks[i].Status = status
