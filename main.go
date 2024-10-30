@@ -1,5 +1,7 @@
 package main
 
+// TODO: Clean up code and fix typos
+
 import (
 	"encoding/json"
 	"errors"
@@ -172,7 +174,7 @@ func addTask(tasks Tasks, description string, filename string) {
 	}
 
 	newTask := Task{
-		Id:          len(tasks.Tasks) + 1,
+		Id:          getNextId(tasks),
 		Description: description,
 		CreatedAt:   time.Now().Format("2006/01/02, 15:04"),
 		UpdatedAt:   time.Now().Format("2006/01/02, 15:04"),
@@ -183,6 +185,16 @@ func addTask(tasks Tasks, description string, filename string) {
 
 	updateJSON(tasks, filename)
 	fmt.Println("Task added:", description)
+}
+
+func getNextId(tasks Tasks) int {
+	maxId := 0
+	for _, task := range tasks.Tasks {
+		if task.Id > maxId {
+			maxId = task.Id
+		}
+	}
+	return maxId + 1
 }
 
 func updateTask(tasks Tasks, _id string, description string, filename string) {
@@ -279,12 +291,6 @@ func deleteTask(tasks Tasks, _id string, filename string) {
 	if foundTask == false {
 		fmt.Println("Task not found.")
 		return
-	} else {
-		for i, task := range tasks.Tasks {
-			if task.Id != i+1 {
-				tasks.Tasks[i].Id = i + 1
-			}
-		}
 	}
 
 	updateJSON(tasks, filename)
